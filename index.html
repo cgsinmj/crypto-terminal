@@ -67,6 +67,24 @@ body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min
 .credit-bar{text-align:center;padding:10px 0 4px;border-top:1px solid #00ffcc0a;margin-top:4px}
 .credit-main{font-size:.57rem;color:#00ffcc66;letter-spacing:.12em;margin-bottom:5px}
 .credit-sub{font-size:.39rem;color:#ffffff28;letter-spacing:.08em}
+
+.lang-btn{background:transparent;border:1px solid #ffcc0055;border-radius:2px;color:#ffcc0088;font-family:'Press Start 2P',monospace;font-size:.3rem;padding:4px 8px;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+.lang-btn:hover{border-color:#ffcc00;color:#ffcc00;box-shadow:0 0 8px #ffcc0044}
+.help-btn{background:transparent;border:1px solid #ffffff33;border-radius:2px;color:#ffffff55;font-family:'Press Start 2P',monospace;font-size:.3rem;padding:4px 8px;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+.help-btn:hover{border-color:#00ffcc;color:#00ffcc;box-shadow:0 0 8px #00ffcc44}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;overflow-y:auto;padding:20px 10px}
+.modal-overlay.open{display:flex;align-items:flex-start;justify-content:center}
+.modal-box{position:relative;background:#060c08;border:1px solid #00ffcc44;border-radius:2px;max-width:720px;width:100%;padding:24px;box-shadow:0 0 40px #00ffcc22}
+.modal-title{font-size:.75rem;color:#00ffcc;text-shadow:0 0 14px #00ffcc;letter-spacing:.15em;margin-bottom:18px;text-align:center}
+.modal-close{position:absolute;top:14px;right:16px;background:transparent;border:1px solid #ffffff22;color:#ffffff44;font-family:'Press Start 2P',monospace;font-size:.3rem;padding:4px 8px;cursor:pointer;border-radius:2px}
+.modal-close:hover{border-color:#ff3300;color:#ff3300}
+.help-section{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #ffffff0a}
+.help-section:last-child{border-bottom:none;margin-bottom:0}
+.help-sec-title{font-size:.45rem;margin-bottom:8px;letter-spacing:.1em}
+.help-row{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-bottom:6px;align-items:start}
+.help-key{font-size:.32rem;color:#ffcc00;letter-spacing:.06em;padding-top:1px}
+.help-val{font-size:.3rem;color:#ffffff55;line-height:1.7;letter-spacing:.04em}
+@media(max-width:500px){.help-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -84,6 +102,8 @@ body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min
       <span class="s-time" id="stime"></span>
       <span class="cur">█</span>
       <button class="sound-btn on" id="soundBtn" onclick="toggleSound()">♪ SFX ON</button>
+      <button class="lang-btn" id="langBtn" onclick="toggleLang()">KR</button>
+      <button class="help-btn" onclick="openHelp()">? HELP</button>
     </div>
   </div>
 
@@ -117,6 +137,15 @@ body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min
     <div class="credit-sub">blog.naver.com/pickhaezoom &nbsp;·&nbsp; POWERED BY CLAUDE AI (ANTHROPIC) &nbsp;·&nbsp; NOT FINANCIAL ADVICE</div>
   </div>
   <div class="footer">DATA: BINANCE WS · COINGECKO REST · AUTO SIM FALLBACK</div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal" onclick="closeHelpOutside(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="helpTitle">◈ HELP GUIDE ◈</div>
+    <button class="modal-close" onclick="closeHelp()">✕ CLOSE</button>
+    <div id="helpContent"></div>
+  </div>
 </div>
 
 <script>
@@ -597,6 +626,296 @@ setInterval(function(){
   renderRSI(); renderFG(); renderOB(); updateTicker();
   playTick();
 }, 2500);
+// ── LANGUAGE SYSTEM ─────────────────────────────────────────
+var lang = 'EN';
+
+const T = {
+  EN: {
+    // header
+    subtitle: 'REAL-TIME MARKET DATA SYSTEM v2.0 — BTC · ETH · SOL',
+    connecting: 'CONNECTING...',
+    simMode: 'SIM MODE',
+    liveWS: 'LIVE ◆ BINANCE WS',
+    liveREST: 'LIVE ◆ REST',
+    sfxOn: '♪ SFX ON',
+    sfxOff: '♪ SFX OFF',
+    langBtn: 'KR',
+    // card labels
+    live: '◆ LIVE', sim: '◆ SIM',
+    mktCap: 'MKT CAP', vol24: '24H VOL', btcRatio: 'BTC RATIO',
+    priceLabel: '◆ REAL-TIME PRICE LINE',
+    candleLabel: '◆ CANDLE CHART',
+    // bottom panels
+    fearGreed: '◆ FEAR & GREED INDEX',
+    rsiTitle: '◆ RSI INDICATOR',
+    obTitle: '◆ ORDER BOOK (BTC)',
+    // RSI labels
+    oversold: 'OVERSOLD', neutral: 'NEUTRAL', overbought: 'OVERBOUGHT',
+    // FG labels
+    fgLabels: ['EXTREME FEAR','FEAR','NEUTRAL','GREED','EXTREME GREED'],
+    // OB labels
+    obPrice: 'PRICE (USD)', obSize: 'SIZE (BTC)', spread: 'SPREAD',
+    obAsks: '▲ ASKS', obBids: '▼ BIDS',
+    // ticker extras
+    simTicker: '◆ SIMULATION MODE', liveTicker: '◆ LIVE API DATA',
+    notFin: '◆ NOT FINANCIAL ADVICE',
+    // footer
+    footerData: 'DATA: BINANCE WS · COINGECKO REST · AUTO SIM FALLBACK',
+    // help
+    helpTitle: '◈ HELP GUIDE ◈',
+    helpSections: [
+      {
+        title: '📈 PRICE CARDS — BTC / ETH / SOL',
+        color: '#ff6b00',
+        rows: [
+          ['Current Price', 'Real-time price in USD. Updated every tick from Binance WebSocket.'],
+          ['24H Change %', 'Price change vs 24 hours ago. Red = up, Green = down (Korean stock style).'],
+          ['MKT CAP', 'Market Capitalization = Price × Total Supply. Indicates the overall size of the coin.'],
+          ['24H VOL', '24-hour total trading volume in USD. Higher volume = more active market.'],
+          ['BTC RATIO', 'How many BTC equals 1 ETH or 1 SOL. Shows relative value against Bitcoin.'],
+          ['Price Line Chart', 'Real-time line chart. Updates every 2 seconds. Red line = uptrend, Green = downtrend.'],
+          ['Candle Chart', 'Candlestick chart. Each candle shows Open/High/Low/Close. Red candle = price rose, Green = fell.'],
+        ]
+      },
+      {
+        title: '🌡️ FEAR & GREED INDEX',
+        color: '#ffaa00',
+        rows: [
+          ['0 ~ 25', 'EXTREME FEAR — Market panic selling. Historically near price bottoms.'],
+          ['25 ~ 45', 'FEAR — More sellers than buyers. Cautious market sentiment.'],
+          ['45 ~ 55', 'NEUTRAL — Balanced market. No strong direction.'],
+          ['55 ~ 75', 'GREED — Buyers dominating. Market optimism rising.'],
+          ['75 ~ 100', 'EXTREME GREED — Market overheated. Correction risk increases.'],
+          ['Tip', 'Warren Buffett: "Be fearful when others are greedy, greedy when others are fearful."'],
+        ]
+      },
+      {
+        title: '📊 RSI INDICATOR (Relative Strength Index)',
+        color: '#00ffcc',
+        rows: [
+          ['What is RSI?', 'Measures how overbought or oversold a coin is. Compares recent gains vs losses over 14 periods.'],
+          ['Below 30', 'OVERSOLD — Dropped too much. Possible rebound signal. (Green bar)'],
+          ['30 ~ 70', 'NEUTRAL — Normal price range. No strong signal. (Yellow bar)'],
+          ['Above 70', 'OVERBOUGHT — Rose too much. Possible pullback signal. (Red bar)'],
+          ['Alert', 'A warning sound plays when RSI crosses 28 or 72 (30 second cooldown).'],
+          ['Note', 'RSI is a reference indicator only. Not a guarantee of price direction.'],
+        ]
+      },
+      {
+        title: '📋 ORDER BOOK (BTC)',
+        color: '#9945ff',
+        rows: [
+          ['ASKS (Red)', 'Sell orders — people saying "I will sell at this price." Sorted from lowest ask up.'],
+          ['BIDS (Green)', 'Buy orders — people saying "I will buy at this price." Sorted from highest bid down.'],
+          ['Bar Length', 'Width shows volume at that price level. Longer bar = more orders stacked there.'],
+          ['SPREAD', 'Gap between lowest ask and highest bid. Smaller spread = healthier, more liquid market.'],
+          ['Refresh Rate', 'Order book updates every 2.5 seconds with simulated realistic data.'],
+        ]
+      },
+      {
+        title: '🔊 SOUND EFFECTS',
+        color: '#ffcc00',
+        rows: [
+          ['Boot Jingle', 'Plays once when the page loads. 8-bit ascending melody.'],
+          ['Price Up', '3-note ascending chirp when BTC price rises.'],
+          ['Price Down', '3-note descending blip when BTC price falls.'],
+          ['Tick', 'Quiet beep every 2.5 seconds on data refresh.'],
+          ['RSI Alert', 'Warning sound when RSI goes extreme (below 28 or above 72).'],
+          ['Toggle', '♪ SFX ON/OFF button in header controls all sounds.'],
+        ]
+      },
+      {
+        title: '⚙️ DATA & CONNECTION',
+        color: '#ffffff55',
+        rows: [
+          ['LIVE ◆ BINANCE WS', 'Connected to Binance WebSocket. Price updates on every trade tick.'],
+          ['LIVE ◆ REST', 'Connected via REST API (CoinGecko). Updates every 30 seconds.'],
+          ['SIM MODE', 'Both connections failed. Running realistic price simulation.'],
+          ['Auto Reconnect', 'If connection drops, automatically retries every 3 seconds.'],
+          ['History Preload', 'On first load, 80 minutes of 1-minute candle data is fetched so RSI/charts are ready immediately.'],
+        ]
+      }
+    ]
+  },
+  KR: {
+    subtitle: '실시간 암호화폐 시세 대시보드 v2.0 — BTC · ETH · SOL',
+    connecting: '연결 중...',
+    simMode: '시뮬레이션 모드',
+    liveWS: '실시간 ◆ 바이낸스 WS',
+    liveREST: '실시간 ◆ REST',
+    sfxOn: '♪ 효과음 ON',
+    sfxOff: '♪ 효과음 OFF',
+    langBtn: 'EN',
+    live: '◆ 실시간', sim: '◆ 시뮬',
+    mktCap: '시가총액', vol24: '24H 거래량', btcRatio: 'BTC 비율',
+    priceLabel: '◆ 실시간 가격 차트',
+    candleLabel: '◆ 캔들 차트',
+    fearGreed: '◆ 공포·탐욕 지수',
+    rsiTitle: '◆ RSI 지표',
+    obTitle: '◆ 호가창 (BTC)',
+    oversold: '과매도', neutral: '중립', overbought: '과매수',
+    fgLabels: ['극단적 공포','공포','중립','탐욕','극단적 탐욕'],
+    obPrice: '가격 (USD)', obSize: '수량 (BTC)', spread: '스프레드',
+    obAsks: '▲ 매도', obBids: '▼ 매수',
+    simTicker: '◆ 시뮬레이션 모드', liveTicker: '◆ 실시간 데이터',
+    notFin: '◆ 투자 조언 아님',
+    footerData: '데이터: 바이낸스 WS · 코인게코 · 자동 시뮬 전환',
+    helpTitle: '◈ 도움말 ◈',
+    helpSections: [
+      {
+        title: '📈 가격 카드 — BTC / ETH / SOL',
+        color: '#ff6b00',
+        rows: [
+          ['현재 가격', '바이낸스 WebSocket에서 실시간으로 받아오는 USD 기준 현재 시세입니다.'],
+          ['24H 등락률', '24시간 전 대비 가격 변동률입니다. 빨강=상승, 초록=하락 (한국 주식식).'],
+          ['시가총액', '현재가 × 전체 발행량. 해당 코인의 시장 전체 규모를 나타냅니다.'],
+          ['24H 거래량', '24시간 동안 거래된 총 금액(USD). 클수록 거래가 활발한 시장입니다.'],
+          ['BTC 비율', '비트코인 1개로 ETH 또는 SOL을 몇 개 살 수 있는지 나타내는 상대적 가치입니다.'],
+          ['실시간 라인 차트', '2초마다 갱신되는 가격 꺾은선 그래프입니다. 빨간선=상승 추세, 초록선=하락 추세.'],
+          ['캔들 차트', '봉차트입니다. 각 봉은 시가·고가·저가·종가를 표시합니다. 빨간 봉=오른 구간, 초록 봉=내린 구간.'],
+        ]
+      },
+      {
+        title: '🌡️ 공포·탐욕 지수 (Fear & Greed Index)',
+        color: '#ffaa00',
+        rows: [
+          ['0 ~ 25', '극단적 공포 — 모두가 겁에 질려 팔고 있는 상태. 역사적으로 저점 근처에서 나타납니다.'],
+          ['25 ~ 45', '공포 — 매도 심리 우세. 시장 분위기가 불안한 상태입니다.'],
+          ['45 ~ 55', '중립 — 매수/매도 균형 상태. 방향성이 뚜렷하지 않습니다.'],
+          ['55 ~ 75', '탐욕 — 매수 심리 우세. 시장 낙관론이 커지고 있습니다.'],
+          ['75 ~ 100', '극단적 탐욕 — 시장 과열 상태. 조정 가능성이 높아집니다.'],
+          ['투자 격언', '"남들이 탐욕스러울 때 두려워하고, 남들이 두려워할 때 탐욕스러워라." — 워런 버핏'],
+        ]
+      },
+      {
+        title: '📊 RSI 지표 (상대강도지수)',
+        color: '#00ffcc',
+        rows: [
+          ['RSI란?', '최근 14개 데이터 기준으로 상승 폭과 하락 폭을 비교해 현재 시장이 과열인지 침체인지 측정합니다.'],
+          ['30 이하', '과매도 — 너무 많이 하락한 상태. 반등 가능성 신호입니다. (초록색 막대)'],
+          ['30 ~ 70', '중립 — 정상 범위. 뚜렷한 방향 신호가 없습니다. (노란색 막대)'],
+          ['70 이상', '과매수 — 너무 많이 상승한 상태. 조정 가능성 신호입니다. (빨간색 막대)'],
+          ['경고음', 'RSI가 28 이하 또는 72 이상에 도달하면 경고 사운드가 울립니다 (30초 쿨다운).'],
+          ['주의사항', 'RSI는 참고 지표입니다. 가격 방향을 보장하지 않습니다.'],
+        ]
+      },
+      {
+        title: '📋 호가창 (Order Book, BTC)',
+        color: '#9945ff',
+        rows: [
+          ['매도 호가 (빨강)', '"이 가격에 팔겠다"는 주문 목록입니다. 낮은 가격부터 위에서 아래로 나열됩니다.'],
+          ['매수 호가 (초록)', '"이 가격에 사겠다"는 주문 목록입니다. 높은 가격부터 위에서 아래로 나열됩니다.'],
+          ['막대 길이', '해당 가격에 쌓인 주문 물량 크기입니다. 길수록 그 가격에 주문이 많습니다.'],
+          ['스프레드', '최저 매도가와 최고 매수가의 차이입니다. 좁을수록 유동성이 풍부한 건강한 시장입니다.'],
+          ['갱신 주기', '호가창은 2.5초마다 갱신됩니다.'],
+        ]
+      },
+      {
+        title: '🔊 효과음 안내',
+        color: '#ffcc00',
+        rows: [
+          ['부팅 징글', '페이지 로딩 시 한 번 재생되는 8비트 상승 멜로디입니다.'],
+          ['가격 상승음', 'BTC 가격이 오를 때 3음 상승 chirp이 재생됩니다.'],
+          ['가격 하락음', 'BTC 가격이 내릴 때 3음 하강 blip이 재생됩니다.'],
+          ['틱 소리', '2.5초마다 데이터 갱신 시 조용한 비프음이 재생됩니다.'],
+          ['RSI 경고음', 'RSI 극단값(28 이하 또는 72 이상) 도달 시 경고음이 울립니다.'],
+          ['토글', '헤더의 ♪ 효과음 ON/OFF 버튼으로 모든 사운드를 제어합니다.'],
+        ]
+      },
+      {
+        title: '⚙️ 데이터 및 연결 상태',
+        color: '#ffffff55',
+        rows: [
+          ['실시간 ◆ 바이낸스 WS', '바이낸스 WebSocket에 연결됨. 거래 발생 즉시 가격이 갱신됩니다.'],
+          ['실시간 ◆ REST', 'REST API(코인게코)로 연결됨. 30초마다 갱신됩니다.'],
+          ['시뮬레이션 모드', '두 연결이 모두 실패한 경우 현실적인 가격 시뮬레이션으로 자동 전환됩니다.'],
+          ['자동 재연결', '연결이 끊기면 3초 후 자동으로 재연결을 시도합니다.'],
+          ['히스토리 프리로드', '첫 접속 시 1분봉 80개 데이터를 즉시 불러와 RSI와 차트가 처음부터 완성된 상태로 표시됩니다.'],
+        ]
+      }
+    ]
+  }
+};
+
+function applyLang() {
+  const t = T[lang];
+  // subtitle
+  const sub = document.querySelector('.hdr-sub');
+  if (sub) sub.textContent = t.subtitle;
+  // lang button
+  const lb = document.getElementById('langBtn');
+  if (lb) lb.textContent = t.langBtn;
+  // sound btn
+  const sb = document.getElementById('soundBtn');
+  if (sb) sb.textContent = soundOn ? t.sfxOn : t.sfxOff;
+  // bottom section titles
+  const fg = document.querySelector('#fgCard .sec');
+  if (fg) fg.textContent = t.fearGreed;
+  const rsi = document.querySelectorAll('.sec')[1];
+  if (rsi) rsi.textContent = t.rsiTitle;
+  const ob = document.querySelectorAll('.sec')[2];
+  if (ob) ob.textContent = t.obTitle;
+  // footer
+  const ft = document.querySelector('.footer');
+  if (ft) ft.textContent = t.footerData;
+  // re-render dynamic panels (RSI, FG labels use T[lang] now)
+  renderRSI(); renderFG(); renderOB();
+}
+
+function toggleLang() {
+  lang = lang === 'EN' ? 'KR' : 'EN';
+  applyLang();
+  if (soundOn) beep(660, 0.08, 'square', 0.06, 0);
+}
+
+// Patch renderFG to use T[lang].fgLabels
+const _origRenderFG = renderFG;
+renderFG = function() {
+  _origRenderFG();
+  const lbls = T[lang].fgLabels;
+  const v = Math.round(S.fg);
+  const fl = document.getElementById('fgl');
+  if (fl) fl.textContent = lbls[Math.min(Math.floor(v/20),4)];
+};
+
+// ── HELP MODAL ───────────────────────────────────────────────
+function buildHelpContent() {
+  const t = T[lang];
+  const el = document.getElementById('helpContent');
+  const title = document.getElementById('helpTitle');
+  if (!el) return;
+  if (title) title.textContent = t.helpTitle;
+  el.innerHTML = t.helpSections.map(sec => `
+    <div class="help-section">
+      <div class="help-sec-title" style="color:${sec.color};text-shadow:0 0 10px ${sec.color}88">${sec.title}</div>
+      ${sec.rows.map(([k,v]) => `
+        <div class="help-row">
+          <div class="help-key">${k}</div>
+          <div class="help-val">${v}</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function openHelp() {
+  buildHelpContent();
+  document.getElementById('helpModal').classList.add('open');
+  if (soundOn) { beep(440,0.06,'square',0.05,0); beep(550,0.06,'square',0.05,0.07); }
+}
+
+function closeHelp() {
+  document.getElementById('helpModal').classList.remove('open');
+  if (soundOn) beep(330,0.08,'square',0.05,0);
+}
+
+function closeHelpOutside(e) {
+  if (e.target.id === 'helpModal') closeHelp();
+}
+
+// ESC key closes modal
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') closeHelp();
+});
+
 </script>
 </body>
 </html>
