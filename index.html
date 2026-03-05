@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>◈ CRYPTO TERMINAL ◈</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;background:#111}::-webkit-scrollbar-thumb{background:#1a3a1a}
+@keyframes flicker{0%,100%{opacity:1}93%{opacity:.97}97%{opacity:.99}}
+@keyframes scanMove{0%{transform:translateY(-100%)}100%{transform:translateY(110vh)}}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes glitch{0%,94%,100%{transform:translate(0)}95%{transform:translate(-2px,1px)}97%{transform:translate(2px,-1px)}}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px)}
+.beam-wrap{position:fixed;inset:0;pointer-events:none;z-index:998;overflow:hidden}
+.beam{position:absolute;left:0;right:0;height:80px;background:linear-gradient(to bottom,transparent,rgba(0,255,150,.018),transparent);animation:scanMove 7s linear infinite}
+.gridbg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,255,120,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,120,.018) 1px,transparent 1px);background-size:48px 48px;z-index:0}
+.wrap{position:relative;z-index:1;padding:16px;animation:flicker 12s ease infinite;max-width:1200px;margin:0 auto}
+.hdr{text-align:center;padding-bottom:12px;border-bottom:1px solid #00ffcc18;margin-bottom:14px}
+.hdr-title{font-size:clamp(.65rem,2vw,1rem);color:#00ffcc;text-shadow:0 0 24px #00ffcc,0 0 48px #00ffcc44;letter-spacing:.2em;animation:glitch 11s ease infinite;margin-bottom:5px}
+.hdr-sub{font-size:.3rem;color:#ffffff2a;letter-spacing:.12em;margin-bottom:7px}
+.hdr-stat{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.dot.live{background:#00ff66;box-shadow:0 0 8px #00ff66;animation:pulse .8s ease infinite}
+.dot.sim{background:#ffaa00;box-shadow:0 0 8px #ffaa00;animation:pulse 1.2s ease infinite}
+.s-live{color:#00ff66;font-size:.36rem}.s-sim{color:#ffaa00;font-size:.36rem}
+.s-time{font-size:.3rem;color:#ffffff22}
+.cur{color:#00ffcc55;font-size:.45rem;display:inline-block;width:.6em;animation:blink 1s ease infinite}
+.main-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.main-grid{grid-template-columns:1fr}}
+.bot-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:860px){.bot-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.bot-grid{grid-template-columns:1fr}}
+.card{position:relative;border-radius:2px;padding:14px;background:rgba(4,10,6,.88);animation:fadeIn .5s ease}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.015) 0%,transparent 60%);pointer-events:none}
+.cn{position:absolute;width:9px;height:9px}
+.sec{font-size:.52rem;color:#ffffff55;letter-spacing:.1em;margin-bottom:10px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.psym{font-size:.72rem}
+.ptag{font-size:.28rem;color:#ffffff1a}
+.pprice{font-size:clamp(.8rem,2vw,1.35rem);color:#fff;margin-bottom:5px;letter-spacing:.04em}
+.pch{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.pchv{font-size:.5rem}
+.pchl{font-size:.3rem;color:#ffffff2a}
+.pstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:11px}
+.ps{background:rgba(255,255,255,.025);border:1px solid #ffffff0a;padding:5px 7px}
+.psl{font-size:.26rem;color:#ffffff2a;margin-bottom:3px;letter-spacing:.05em}
+.psv{font-size:.42rem}
+.clbl{font-size:.28rem;color:#ffffff18;margin-bottom:4px;letter-spacing:.07em}
+.ob-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;position:relative;font-size:.35rem}
+.ob-bg{position:absolute;top:0;bottom:0;opacity:.12;border-radius:1px}
+.ob-spread{text-align:center;padding:3px 0;font-size:.32rem;color:#ffcc00;border-top:1px solid #ffffff0a;border-bottom:1px solid #ffffff0a;margin:3px 0}
+.rsi-bg{height:7px;background:#111;border-radius:1px;overflow:hidden;margin:5px 0}
+.rsi-fill{height:100%;border-radius:1px;transition:width .8s}
+.ticker-wrap{overflow:hidden;border-top:1px solid #00ffcc12;border-bottom:1px solid #00ffcc12;padding:6px 0;background:rgba(0,255,204,.012);margin-bottom:10px}
+.ticker-inner{white-space:nowrap;font-size:.38rem;color:#00ffcc55;letter-spacing:.1em;display:inline-block;animation:ticker 30s linear infinite}
+.footer{text-align:center;font-size:.26rem;color:#ffffff10;letter-spacing:.06em}
+.sound-btn{background:transparent;border:1px solid #00ffcc44;border-radius:2px;color:#00ffcc88;font-family:'Press Start 2P',monospace;font-size:.3rem;padding:4px 8px;cursor:pointer;letter-spacing:.08em;transition:all .2s}
+.sound-btn.on{border-color:#00ffcc;color:#00ffcc;box-shadow:0 0 8px #00ffcc44}
+.sound-btn.off{border-color:#ffffff22;color:#ffffff33}
+.credit-bar{text-align:center;padding:10px 0 4px;border-top:1px solid #00ffcc0a;margin-top:4px}
+.credit-main{font-size:.57rem;color:#00ffcc66;letter-spacing:.12em;margin-bottom:5px}
+.credit-sub{font-size:.39rem;color:#ffffff28;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="beam-wrap"><div class="beam"></div></div>
+<div class="gridbg"></div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-title">◈ CRYPTO TERMINAL ◈</div>
+    <div class="hdr-sub">REAL-TIME MARKET DATA SYSTEM v2.0 — BTC · ETH</div>
+    <div class="hdr-stat">
+      <span class="dot sim" id="dot"></span>
+      <span class="s-sim" id="stxt">CONNECTING...</span>
+      <span class="s-time" id="stime"></span>
+      <span class="cur">█</span>
+      <button class="sound-btn on" id="soundBtn" onclick="toggleSound()">♪ SFX ON</button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div id="cbtc" class="card" style="border:1px solid #ff6b0033"></div>
+    <div id="ceth" class="card" style="border:1px solid #00ffcc33"></div>
+    <div id="csol" class="card" style="border:1px solid #9945ff33"></div>
+  </div>
+
+  <div class="bot-grid">
+    <div class="card" style="border:1px solid #ffffff0a" id="fgCard">
+      <div class="sec">◆ FEAR &amp; GREED INDEX</div>
+      <canvas id="fgc" width="220" height="120" style="display:block;margin:0 auto 4px"></canvas>
+      <div id="fgv" style="font-size:1.1rem;text-align:center;margin-bottom:2px">--</div>
+      <div id="fgl" style="font-size:.34rem;text-align:center;margin-bottom:8px">---</div>
+      <div id="fgs" style="display:grid;grid-template-columns:1fr 1fr;gap:5px"></div>
+    </div>
+    <div class="card" style="border:1px solid #ffffff0a">
+      <div class="sec">◆ RSI INDICATOR</div>
+      <div id="rsiP"></div>
+    </div>
+    <div class="card" style="border:1px solid #ffffff0a">
+      <div class="sec">◆ ORDER BOOK (BTC)</div>
+      <div id="obP"></div>
+    </div>
+  </div>
+
+  <div class="ticker-wrap"><div class="ticker-inner" id="tkr">◆ LOADING...</div></div>
+  <div class="credit-bar">
+    <div class="credit-main">◈ 픽해줌 · PICKHAEZOOM ◈</div>
+    <div class="credit-sub">blog.naver.com/pickhaezoom &nbsp;·&nbsp; POWERED BY CLAUDE AI (ANTHROPIC) &nbsp;·&nbsp; NOT FINANCIAL ADVICE</div>
+  </div>
+  <div class="footer">DATA: BINANCE WS · COINGECKO REST · AUTO SIM FALLBACK</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const rand = (a,b) => a+Math.random()*(b-a);
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const fmt = (n,d=2) => n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+const S = {
+  btc:{price:95000+rand(0,8000),change:rand(-5,5),cap:0,vol:0},
+  eth:{price:3200+rand(0,400),change:rand(-6,6),cap:0,vol:0},
+  sol:{price:170+rand(0,30),change:rand(-7,7),cap:0,vol:0},
+  bh:[],eh:[],sh:[],bc:[],ec:[],sc:[],
+  sim:true,fg:50
+};
+
+// Cursor
+// cursor blink via CSS animation only - no JS text swap (prevents layout shift)
+
+// ── Simulation ──────────────────────────────────
+function simTick(){
+  const jitter=(p,v)=>p*(1+(rand(0,1)-.499)*v*2);
+  S.btc.price=clamp(jitter(S.btc.price,.0014),40000,250000);
+  S.eth.price=clamp(jitter(S.eth.price,.0018),800,30000);
+  S.btc.change=clamp(S.btc.change+(rand(0,1)-.5)*.08,-18,18);
+  S.eth.change=clamp(S.eth.change+(rand(0,1)-.5)*.1,-22,22);
+  S.sol.price=clamp(jitter(S.sol.price,.0022),50,2000);
+  S.sol.change=clamp(S.sol.change+(rand(0,1)-.5)*.12,-30,30);
+  S.btc.cap=S.btc.price*19.7e6; S.eth.cap=S.eth.price*120e6; S.sol.cap=S.sol.price*457e6;
+  S.btc.vol=rand(18e9,45e9); S.eth.vol=rand(10e9,28e9); S.sol.vol=rand(2e9,8e9);
+}
+
+function pushHist(){
+  S.bh.push(S.btc.price); if(S.bh.length>80)S.bh.shift();
+  S.eh.push(S.eth.price); if(S.eh.length>80)S.eh.shift();
+  S.sh.push(S.sol.price); if(S.sh.length>80)S.sh.shift();
+  if(S.bh.length%5===0)pushCandle("b");
+  if(S.eh.length%5===0)pushCandle("e");
+  if(S.sh.length%5===0)pushCandle("s");
+}
+
+function pushCandle(k){
+  const h=k==="b"?S.bh:k==="e"?S.eh:S.sh, arr=k==="b"?S.bc:k==="e"?S.ec:S.sc;
+  if(h.length<4)return;
+  const sl=h.slice(-5);
+  arr.push({o:sl[0],h:Math.max(...sl),l:Math.min(...sl),c:sl[sl.length-1]});
+  if(arr.length>28)arr.shift();
+}
+
+// ── BINANCE WEBSOCKET ───────────────────────────
+function connectWS(){
+  const ws = new WebSocket("wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker");
+  ws.onopen = () => { setStatus("LIVE ◆ BINANCE WS","live"); S.sim=false; S.wsOk=true; setTimeout(playConnect,300); };
+  ws.onmessage = e => {
+    try {
+      const msg = JSON.parse(e.data);
+      const d = msg.data;
+      const sym = d?.s;
+      if(sym === "BTCUSDT") {
+        S.btc.price  = parseFloat(d.c);
+        S.btc.change = parseFloat(d.P);
+        S.btc.vol    = parseFloat(d.q);  // quote vol in USDT
+        S.btc.cap    = S.btc.price * 19.7e6;
+        S.btc.high   = parseFloat(d.h);
+        S.btc.low    = parseFloat(d.l);
+      } else if(sym === "ETHUSDT") {
+        S.eth.price  = parseFloat(d.c);
+        S.eth.change = parseFloat(d.P);
+        S.eth.vol    = parseFloat(d.q);
+        S.eth.cap    = S.eth.price * 120e6;
+        S.eth.high   = parseFloat(d.h);
+        S.eth.low    = parseFloat(d.l);
+      } else if(sym === "SOLUSDT") {
+        S.sol.price  = parseFloat(d.c);
+        S.sol.change = parseFloat(d.P);
+        S.sol.vol    = parseFloat(d.q);
+        S.sol.cap    = S.sol.price * 457e6;
+        S.sol.high   = parseFloat(d.h);
+        S.sol.low    = parseFloat(d.l);
+      }
+      pushHist(); renderAll(); if(typeof triggerSounds==="function")triggerSounds();
+    } catch(err) {}
+  };
+  ws.onerror = () => { S.wsOk=false; };
+  ws.onclose = () => {
+    S.wsOk=false;
+    setStatus("SIM MODE","sim");
+    S.sim=true;
+    // Auto reconnect after 3s
+    setTimeout(connectWS, 3000);
+  };
+  return ws;
+}
+
+// CoinGecko REST fallback (for volume/cap supplement)
+async function fetchAPI(){
+  try{
+    const r=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true",
+      {signal:AbortSignal.timeout(8000)});
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    if(d.bitcoin?.usd && !S.wsOk){S.btc.price=d.bitcoin.usd;S.btc.change=d.bitcoin.usd_24h_change||0;S.btc.cap=d.bitcoin.usd_market_cap||0;S.btc.vol=d.bitcoin.usd_24h_vol||0;}
+    if(d.ethereum?.usd && !S.wsOk){S.eth.price=d.ethereum.usd;S.eth.change=d.ethereum.usd_24h_change||0;S.eth.cap=d.ethereum.usd_market_cap||0;S.eth.vol=d.ethereum.usd_24h_vol||0;}
+    if(d.solana?.usd && !S.wsOk){S.sol.price=d.solana.usd;S.sol.change=d.solana.usd_24h_change||0;S.sol.cap=d.solana.usd_market_cap||0;S.sol.vol=d.solana.usd_24h_vol||0;}
+    if(!S.wsOk){ S.sim=false; setStatus("LIVE ◆ REST","live"); }
+    // Always update cap/vol from CoinGecko even if WS is active
+    if(d.bitcoin) S.btc.cap=d.bitcoin.usd_market_cap||S.btc.cap;
+    if(d.ethereum) S.eth.cap=d.ethereum.usd_market_cap||S.eth.cap;
+    if(d.solana) S.sol.cap=d.solana.usd_market_cap||S.sol.cap;
+  }catch(e){ if(!S.wsOk){S.sim=true;setStatus("SIM MODE","sim");} }
+}
+
+function setStatus(txt,cls){
+  $("dot").className="dot "+cls;
+  $("stxt").className="s-"+cls;
+  $("stxt").textContent=txt;
+  $("stime").textContent="UPD: "+new Date().toLocaleTimeString("ko-KR");
+}
+
+// ── DRAW: line ──────────────────────────────────
+function drawLine(cv,hist,color){
+  if(!cv||hist.length<2)return;
+  const W=cv.width,H=cv.height,ctx=cv.getContext("2d");
+  ctx.clearRect(0,0,W,H);
+  const mn=Math.min(...hist),mx=Math.max(...hist),rng=mx-mn||1;
+  const x=i=>(i/(hist.length-1))*W, y=v=>H-((v-mn)/rng)*(H-10)-5;
+  ctx.strokeStyle="rgba(255,255,255,.04)";ctx.setLineDash([2,4]);
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(0,H/4*i+H/8);ctx.lineTo(W,H/4*i+H/8);ctx.stroke();}
+  ctx.setLineDash([]);
+  const up=hist[hist.length-1]>=hist[0],lc=up?"#ff3300":"#00cc44";
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,lc+"44");g.addColorStop(1,lc+"00");
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.moveTo(x(0),H);
+  hist.forEach((v,i)=>ctx.lineTo(x(i),y(v)));
+  ctx.lineTo(W,H);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=lc;ctx.lineWidth=1.8;ctx.shadowColor=lc;ctx.shadowBlur=5;
+  ctx.beginPath();hist.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.fillStyle=lc;ctx.shadowColor=lc;ctx.shadowBlur=8;
+  ctx.beginPath();ctx.arc(W,y(hist[hist.length-1]),3.5,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+}
+
+// ── DRAW: candle ────────────────────────────────
+function drawCandles(cv,candles){
+  if(!cv||candles.length<2)return;
+  const W=cv.width,H=cv.height,ctx=cv.getContext("2d");
+  ctx.clearRect(0,0,W,H);
+  const ps=[...candles.map(c=>c.h),...candles.map(c=>c.l)];
+  const mn=Math.min(...ps),mx=Math.max(...ps),rng=mx-mn||1;
+  const y=v=>H-((v-mn)/rng)*(H-10)-5;
+  const gap=W/candles.length,cw=Math.max(3,gap*.6);
+  ctx.strokeStyle="rgba(255,255,255,.04)";ctx.setLineDash([2,4]);
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(0,H/3*i+H/6);ctx.lineTo(W,H/3*i+H/6);ctx.stroke();}
+  ctx.setLineDash([]);
+  candles.forEach((c,i)=>{
+    const cx=i*gap+gap/2,up=c.c>=c.o,col=up?"#ff3300":"#00cc44";
+    ctx.strokeStyle=col;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(cx,y(c.h));ctx.lineTo(cx,y(c.l));ctx.stroke();
+    const top=Math.min(y(c.o),y(c.c)),bh=Math.max(Math.abs(y(c.o)-y(c.c)),2);
+    ctx.fillStyle=col;ctx.globalAlpha=.85;ctx.fillRect(cx-cw/2,top,cw,bh);ctx.globalAlpha=1;
+  });
+}
+
+// ── PRICE CARD ──────────────────────────────────
+function renderCard(eid,sym,label,color,glow,data,hist,candles){
+  const el=$(eid);if(!el)return;
+  const up=data.change>=0,cc=up?"#ff3300":"#00cc44";
+  el.innerHTML=`
+    <div class="cn" style="top:0;left:0;border-top:2px solid ${color};border-left:2px solid ${color}"></div>
+    <div class="cn" style="top:0;right:0;border-top:2px solid ${color};border-right:2px solid ${color}"></div>
+    <div class="cn" style="bottom:0;left:0;border-bottom:2px solid ${color};border-left:2px solid ${color}"></div>
+    <div class="cn" style="bottom:0;right:0;border-bottom:2px solid ${color};border-right:2px solid ${color}"></div>
+    <div class="ph">
+      <div class="psym" style="color:${color};text-shadow:0 0 14px ${glow};animation:glitch 13s ease infinite">▶ ${label}/USD</div>
+      <div class="ptag">${S.sim?"◆ SIM":"◆ LIVE"}</div>
+    </div>
+    <div class="pprice" style="text-shadow:0 0 18px ${color}">$${fmt(data.price)}</div>
+    <div class="pch">
+      <span class="pchv" style="color:${cc};text-shadow:0 0 8px ${cc}">${up?"▲":"▼"} ${Math.abs(data.change).toFixed(2)}%</span>
+      <span class="pchl">24H</span>
+    </div>
+    <div class="pstats">
+      <div class="ps"><div class="psl">MKT CAP</div><div class="psv" style="color:${color}">${data.cap?"$"+(data.cap/1e9).toFixed(1)+"B":"---"}</div></div>
+      <div class="ps"><div class="psl">24H VOL</div><div class="psv" style="color:${color}">${data.vol?"$"+(data.vol/1e9).toFixed(2)+"B":"---"}</div></div>
+      <div class="ps"><div class="psl">BTC RATIO</div><div class="psv" style="color:${color}">${sym==="btc"?"1.000":sym==="eth"?(S.eth.price/S.btc.price).toFixed(4):(S.sol.price/S.btc.price).toFixed(5)}</div></div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div class="clbl">◆ REAL-TIME PRICE LINE</div>
+      <canvas id="ln-${sym}" width="320" height="58" style="width:100%;display:block"></canvas>
+    </div>
+    <div>
+      <div class="clbl">◆ CANDLE CHART</div>
+      <canvas id="cd-${sym}" width="320" height="58" style="width:100%;display:block"></canvas>
+    </div>`;
+  requestAnimationFrame(()=>{
+    drawLine($("ln-"+sym),hist,color);
+    drawCandles($("cd-"+sym),candles);
+  });
+}
+
+// ── RSI ──────────────────────────────────────────
+function calcRSI(prices,p=14){
+  if(prices.length<p+1)return 50;
+  let g=0,l=0;
+  for(let i=prices.length-p;i<prices.length;i++){
+    const d=prices[i]-prices[i-1];
+    if(d>0)g+=d;else l+=Math.abs(d);
+  }
+  return 100-(100/(1+(g/(l||.001))));
+}
+
+function renderRSI(){
+  const el=$("rsiP");if(!el)return;
+  const rb=calcRSI(S.bh),re=calcRSI(S.eh);
+  const rc=v=>v>70?"#ff3300":v<30?"#00cc44":"#ffcc00";
+  const rl=v=>v>70?"OVERBOUGHT":v<30?"OVERSOLD":"NEUTRAL";
+  el.innerHTML=[["BTC",rb,"#ff6b00"],["ETH",re,"#00ffcc"],["SOL",calcRSI(S.sh),"#9945ff"]].map(([sym,rsi,sc])=>`
+    <div style="margin-bottom:13px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:.36rem;color:${sc}">${sym}</span>
+        <span style="font-size:.36rem;color:${rc(rsi)}">${rsi.toFixed(1)}</span>
+      </div>
+      <div class="rsi-bg">
+        <div class="rsi-fill" style="width:${rsi}%;background:${rc(rsi)};box-shadow:0 0 6px ${rc(rsi)}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.26rem;color:#ffffff1a;margin-top:2px">
+        <span>0</span><span style="color:${rc(rsi)};font-size:.3rem">${rl(rsi)}</span><span>100</span>
+      </div>
+    </div>`).join("")+`
+    <div style="border-top:1px solid #ffffff08;padding-top:7px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center">
+      ${[["<30","#00cc44","OVERSOLD"],["30-70","#ffcc00","NEUTRAL"],[">70","#ff3300","OVERBOUGHT"]].map(([v,c,l])=>`
+        <div><div style="font-size:.24rem;color:${c}44">${l}</div><div style="font-size:.3rem;color:${c}">${v}</div></div>`).join("")}
+    </div>`;
+}
+
+// ── FEAR & GREED ─────────────────────────────────
+function renderFG(){
+  const cv=$("fgc");if(!cv)return;
+  const raw=(S.btc.change+S.eth.change)/2;
+  let target=clamp(50+raw*3.5+rand(-4,4),0,100);
+  S.fg=clamp(S.fg*.93+target*.07,0,100);
+  const v=Math.round(S.fg);
+  const ctx=cv.getContext("2d");
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  // cx, cy = pivot point of the semicircle — center-bottom of arc
+  const r=80, cx=W/2, cy=H-16;
+  // bg arc
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,0);
+  ctx.strokeStyle="#1a1a1a";ctx.lineWidth=16;ctx.stroke();
+  // colored segments
+  [[.2,"#dd1133"],[.15,"#ff5500"],[.3,"#ffaa00"],[.15,"#88cc00"],[.2,"#00ee55"]].reduce((sa,[w,c])=>{
+    const ea=sa+w*Math.PI;
+    ctx.beginPath();ctx.arc(cx,cy,r,sa,ea);
+    ctx.strokeStyle=c;ctx.lineWidth=16;ctx.stroke();
+    return ea;
+  },Math.PI);
+  // needle — rotates from cx,cy (the true center of the arc)
+  const ang=Math.PI-(v/100)*Math.PI;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);
+  ctx.strokeStyle="#ffffff";ctx.lineWidth=2.5;ctx.shadowColor="#fff";ctx.shadowBlur=10;
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-(r-14),0);ctx.stroke();
+  ctx.shadowBlur=0;
+  // center pivot dot
+  ctx.fillStyle="#fff";ctx.shadowColor="#fff";ctx.shadowBlur=8;
+  ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fill();
+  ctx.restore();ctx.shadowBlur=0;
+  // value & label
+  const cols=["#dd1133","#ff5500","#ffaa00","#88cc00","#00ee55"];
+  const lbls=["EXTREME FEAR","FEAR","NEUTRAL","GREED","EXTREME GREED"];
+  const ic=cols[Math.min(Math.floor(v/20),4)];
+  const fv=$("fgv"),fl=$("fgl");
+  fv.style.color=ic;fv.style.textShadow=`0 0 14px ${ic}`;fv.textContent=v;
+  fl.style.color=ic;fl.textContent=lbls[Math.min(Math.floor(v/20),4)];
+  $("fgs").innerHTML=[["BTC 24H",S.btc.change],["ETH 24H",S.eth.change]].map(([l,v])=>
+    `<div class="ps"><div class="psl">${l}</div><div class="psv" style="color:${v>=0?"#ff3300":"#00cc44"}">${v>=0?"+":""}${v.toFixed(2)}%</div></div>`).join("");
+}
+
+// ── ORDER BOOK ───────────────────────────────────
+function renderOB(){
+  const el=$("obP");if(!el)return;
+  const mid=S.btc.price,sp=mid*rand(.00008,.00015);
+  const asks=Array.from({length:6},(_,i)=>({p:mid+sp*(i+1)*rand(.9,1.1),v:rand(.05,2.8)}));
+  const bids=Array.from({length:6},(_,i)=>({p:mid-sp*(i+1)*rand(.9,1.1),v:rand(.05,2.8)}));
+  const mx=Math.max(...asks.map(a=>a.v),...bids.map(b=>b.v));
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:.27rem;color:#ffffff18;margin-bottom:3px;padding:0 2px">
+      <span>PRICE (USD)</span><span>SIZE (BTC)</span>
+    </div>
+    ${asks.reverse().map(a=>`<div class="ob-row">
+      <div class="ob-bg" style="right:0;width:${(a.v/mx*100).toFixed(0)}%;background:#ff3366"></div>
+      <span style="color:#ff3366;z-index:1">${fmt(a.p)}</span>
+      <span style="color:#ffffff2a;z-index:1;font-size:.32rem">${a.v.toFixed(3)}</span>
+    </div>`).join("")}
+    <div class="ob-spread">◆ SPREAD ${fmt(sp*2,1)} (${((sp*2/mid)*100).toFixed(4)}%)</div>
+    ${bids.map(b=>`<div class="ob-row">
+      <div class="ob-bg" style="left:0;width:${(b.v/mx*100).toFixed(0)}%;background:#00ff66"></div>
+      <span style="color:#00ff66;z-index:1">${fmt(b.p)}</span>
+      <span style="color:#ffffff2a;z-index:1;font-size:.32rem">${b.v.toFixed(3)}</span>
+    </div>`).join("")}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px;text-align:center">
+      <div style="font-size:.26rem;color:#ff3366">▲ ASKS ${asks.length}</div>
+      <div style="font-size:.26rem;color:#00ff66">▼ BIDS ${bids.length}</div>
+    </div>`;
+}
+
+// ── TICKER ───────────────────────────────────────
+function updateTicker(){
+  const items=[
+    `BTC $${fmt(S.btc.price)} ${S.btc.change>=0?"▲":"▼"}${Math.abs(S.btc.change).toFixed(2)}%`,
+    `ETH $${fmt(S.eth.price)} ${S.eth.change>=0?"▲":"▼"}${Math.abs(S.eth.change).toFixed(2)}%`,
+    `SOL $${fmt(S.sol.price)} ${S.sol.change>=0?"▲":"▼"}${Math.abs(S.sol.change).toFixed(2)}%`,
+    `BTC/ETH ${(S.btc.price/S.eth.price).toFixed(2)}x`,
+    `BTC MCAP $${(S.btc.cap/1e9).toFixed(0)}B`,
+    `ETH MCAP $${(S.eth.cap/1e9).toFixed(0)}B`,
+    `FG INDEX ${Math.round(S.fg)}`,
+    S.sim?"◆ SIMULATION MODE":"◆ LIVE API DATA",
+    "◆ NOT FINANCIAL ADVICE",
+    "◆ 픽해줌 PickHeaZoom",
+  ];
+  const full=items.join("   ◇   ");
+  $("tkr").textContent=full+"   ◇   "+full;
+}
+
+// ── MAIN LOOP ────────────────────────────────────
+function renderAll(){
+  renderCard("cbtc","btc","BTC","#ff6b00","#ff6b0088",S.btc,S.bh,S.bc);
+  renderCard("ceth","eth","ETH","#00ffcc","#00ffcc88",S.eth,S.eh,S.ec);
+  renderCard("csol","sol","SOL","#9945ff","#9945ff88",S.sol,S.sh,S.sc);
+  renderRSI();renderFG();renderOB();updateTicker();
+}
+
+
+
+// ── 8-BIT SOUND ENGINE ──────────────────────────────────────
+var soundOn = true;
+var _actx = null;
+
+function getACtx() {
+  if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_actx.state === 'suspended') _actx.resume();
+  return _actx;
+}
+
+function beep(freq, dur, type, vol, delay) {
+  if (!soundOn) return;
+  type = type || 'square'; vol = vol || 0.07; delay = delay || 0;
+  try {
+    var ctx = getACtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + dur + 0.01);
+  } catch(e) {}
+}
+
+function playBoot() {
+  var seq = [[220,0],[277,0.1],[330,0.2],[440,0.3],[554,0.42],[659,0.54],[880,0.66]];
+  seq.forEach(function(n){ beep(n[0], 0.12, 'square', 0.06, n[1]); });
+  beep(880, 0.35, 'square', 0.09, 0.82);
+}
+
+function playPriceUp() {
+  beep(523, 0.06, 'square', 0.07, 0);
+  beep(659, 0.06, 'square', 0.07, 0.06);
+  beep(784, 0.10, 'square', 0.07, 0.12);
+}
+
+function playPriceDn() {
+  beep(392, 0.06, 'square', 0.06, 0);
+  beep(311, 0.06, 'square', 0.06, 0.06);
+  beep(247, 0.10, 'square', 0.06, 0.12);
+}
+
+function playTick() {
+  beep(1047, 0.02, 'square', 0.02, 0);
+}
+
+function playAlert() {
+  beep(880, 0.06, 'square', 0.08, 0);
+  beep(880, 0.06, 'square', 0.08, 0.10);
+  beep(1100, 0.14, 'square', 0.08, 0.22);
+}
+
+function playConnect() {
+  [262,330,392,523].forEach(function(f,i){ beep(f, 0.10, 'square', 0.07, i*0.08); });
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  var btn = document.getElementById('soundBtn');
+  if (btn) {
+    btn.textContent = soundOn ? '\u266a SFX ON' : '\u266a SFX OFF';
+    btn.className = 'sound-btn ' + (soundOn ? 'on' : 'off');
+  }
+  if (soundOn) {
+    getACtx();
+    beep(440, 0.15, 'square', 0.08, 0);
+  }
+}
+
+var _prevBtc = 0, _prevEth = 0, _rsiAlertCd = 0;
+
+function triggerSounds() {
+  var now = Date.now();
+  if (_prevBtc && S.btc.price !== _prevBtc) {
+    if (S.btc.price > _prevBtc * 1.0001) playPriceUp();
+    else if (S.btc.price < _prevBtc * 0.9999) playPriceDn();
+    else playTick();
+  }
+  var rsiB = calcRSI(S.bh);
+  if (now - _rsiAlertCd > 30000 && (rsiB > 72 || rsiB < 28)) {
+    playAlert(); _rsiAlertCd = now;
+  }
+  _prevBtc = S.btc.price;
+  _prevEth = S.eth.price;
+}
+
+// ── INIT ────────────────────────────────────────────────────
+S.wsOk = false;
+connectWS();
+fetchAPI(); setInterval(fetchAPI, 30000);
+
+setTimeout(playBoot, 900);
+
+setInterval(function(){
+  if (S.sim) { simTick(); pushHist(); renderAll(); triggerSounds(); }
+}, 2000);
+
+setInterval(function(){
+  renderRSI(); renderFG(); renderOB(); updateTicker();
+  playTick();
+}, 2500);
+</script>
+</body>
+</html>
