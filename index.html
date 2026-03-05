@@ -4,10 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>◈ CRYPTO TERMINAL ◈</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min-height:100vh;overflow-x:hidden}
+body.kr-mode{font-family:'Noto Sans KR',sans-serif}
+body.kr-mode .hdr-title{font-family:'Press Start 2P',monospace}
+body.kr-mode .hdr-sub{font-size:.7rem;letter-spacing:.04em}
+body.kr-mode .sec{font-size:.75rem;letter-spacing:.03em}
+body.kr-mode .psym{font-size:.85rem}
+body.kr-mode .pprice{letter-spacing:.02em}
+body.kr-mode .pchv{font-size:.7rem}
+body.kr-mode .pchl{font-size:.6rem}
+body.kr-mode .psl{font-size:.6rem;letter-spacing:.02em}
+body.kr-mode .psv{font-size:.65rem}
+body.kr-mode .clbl{font-size:.6rem;letter-spacing:.02em}
+body.kr-mode .ptag{font-size:.55rem}
+body.kr-mode .s-live,body.kr-mode .s-sim{font-size:.6rem}
+body.kr-mode .s-time{font-size:.55rem}
+body.kr-mode .sound-btn,body.kr-mode .lang-btn,body.kr-mode .help-btn{font-size:.55rem}
+body.kr-mode .ob-spread{font-size:.6rem}
+body.kr-mode .ob-row{font-size:.6rem}
+body.kr-mode .rsi-fill + *{font-size:.55rem}
+body.kr-mode .ticker-inner{font-size:.6rem}
+body.kr-mode .credit-main{font-size:.75rem}
+body.kr-mode .credit-sub{font-size:.6rem}
+body.kr-mode .footer{font-size:.5rem}
+body.kr-mode .help-sec-title{font-size:.8rem;font-family:'Noto Sans KR',sans-serif;font-weight:700;letter-spacing:.02em}
+body.kr-mode .help-key{font-size:.65rem;font-family:'Noto Sans KR',sans-serif;font-weight:700}
+body.kr-mode .help-val{font-size:.62rem;font-family:'Noto Sans KR',sans-serif;line-height:1.8}
+body.kr-mode .modal-title{font-family:'Press Start 2P',monospace}
+body.kr-mode .modal-close{font-size:.55rem}
 ::-webkit-scrollbar{width:4px;background:#111}::-webkit-scrollbar-thumb{background:#1a3a1a}
 @keyframes flicker{0%,100%{opacity:1}93%{opacity:.97}97%{opacity:.99}}
 @keyframes scanMove{0%{transform:translateY(-100%)}100%{transform:translateY(110vh)}}
@@ -75,15 +102,15 @@ body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;overflow-y:auto;padding:20px 10px}
 .modal-overlay.open{display:flex;align-items:flex-start;justify-content:center}
 .modal-box{position:relative;background:#060c08;border:1px solid #00ffcc44;border-radius:2px;max-width:720px;width:100%;padding:24px;box-shadow:0 0 40px #00ffcc22}
-.modal-title{font-size:.75rem;color:#00ffcc;text-shadow:0 0 14px #00ffcc;letter-spacing:.15em;margin-bottom:18px;text-align:center}
-.modal-close{position:absolute;top:14px;right:16px;background:transparent;border:1px solid #ffffff22;color:#ffffff44;font-family:'Press Start 2P',monospace;font-size:.3rem;padding:4px 8px;cursor:pointer;border-radius:2px}
+.modal-title{font-size:.82rem;color:#00ffcc;text-shadow:0 0 14px #00ffcc;letter-spacing:.15em;margin-bottom:18px;text-align:center}
+.modal-close{position:absolute;top:14px;right:16px;background:transparent;border:1px solid #ffffff22;color:#ffffff44;font-family:'Press Start 2P',monospace;font-size:.42rem;padding:4px 8px;cursor:pointer;border-radius:2px}
 .modal-close:hover{border-color:#ff3300;color:#ff3300}
 .help-section{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #ffffff0a}
 .help-section:last-child{border-bottom:none;margin-bottom:0}
-.help-sec-title{font-size:.45rem;margin-bottom:8px;letter-spacing:.1em}
+.help-sec-title{font-size:.73rem;margin-bottom:10px;letter-spacing:.1em}
 .help-row{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-bottom:6px;align-items:start}
-.help-key{font-size:.32rem;color:#ffcc00;letter-spacing:.06em;padding-top:1px}
-.help-val{font-size:.3rem;color:#ffffff55;line-height:1.7;letter-spacing:.04em}
+.help-key{font-size:.53rem;color:#ffcc00;letter-spacing:.06em;padding-top:1px}
+.help-val{font-size:.48rem;color:#ffffff66;line-height:1.8;letter-spacing:.04em}
 @media(max-width:500px){.help-row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -133,7 +160,9 @@ body{background:#060608;color:#c8d0c8;font-family:'Press Start 2P',monospace;min
 
   <div class="ticker-wrap"><div class="ticker-inner" id="tkr">◆ LOADING...</div></div>
   <div class="credit-bar">
-    <div class="credit-main">◈ 픽해줌 · PICKHAEZOOM ◈</div>
+    <a href="https://blog.naver.com/pickhaezoom" target="_blank" style="text-decoration:none">
+      <div class="credit-main" style="cursor:pointer;transition:all .2s" onmouseover="this.style.color='#00ffcc';this.style.textShadow='0 0 16px #00ffcc'" onmouseout="this.style.color='';this.style.textShadow=''">◈ 픽해줌 · PICKHAEZOOM ◈</div>
+    </a>
     <div class="credit-sub">blog.naver.com/pickhaezoom &nbsp;·&nbsp; POWERED BY CLAUDE AI (ANTHROPIC) &nbsp;·&nbsp; NOT FINANCIAL ADVICE</div>
   </div>
   <div class="footer">DATA: BINANCE WS · COINGECKO REST · AUTO SIM FALLBACK</div>
@@ -261,8 +290,15 @@ async function fetchAPI(){
 function setStatus(txt,cls){
   $("dot").className="dot "+cls;
   $("stxt").className="s-"+cls;
-  $("stxt").textContent=txt;
-  $("stime").textContent="UPD: "+new Date().toLocaleTimeString("ko-KR");
+  // translate status text
+  var tl = (typeof T !== 'undefined' && T[lang]) ? T[lang] : null;
+  if (tl) {
+    if (txt.includes('BINANCE') || txt.includes('바이낸스')) $("stxt").textContent = tl.liveWS;
+    else if (txt.includes('REST')) $("stxt").textContent = tl.liveREST;
+    else $("stxt").textContent = tl.simMode;
+  } else { $("stxt").textContent = txt; }
+  var updLabel = (tl && lang==='KR') ? '갱신: ' : 'UPD: ';
+  $("stime").textContent = updLabel + new Date().toLocaleTimeString("ko-KR");
 }
 
 // ── DRAW: line ──────────────────────────────────
@@ -322,24 +358,24 @@ function renderCard(eid,sym,label,color,glow,data,hist,candles){
     <div class="cn" style="bottom:0;right:0;border-bottom:2px solid ${color};border-right:2px solid ${color}"></div>
     <div class="ph">
       <div class="psym" style="color:${color};text-shadow:0 0 14px ${glow};animation:glitch 13s ease infinite">▶ ${label}/USD</div>
-      <div class="ptag">${S.sim?"◆ SIM":"◆ LIVE"}</div>
+      <div class="ptag">${S.sim?T[lang].sim:T[lang].live}</div>
     </div>
     <div class="pprice" style="text-shadow:0 0 18px ${color}">$${fmt(data.price)}</div>
     <div class="pch">
       <span class="pchv" style="color:${cc};text-shadow:0 0 8px ${cc}">${up?"▲":"▼"} ${Math.abs(data.change).toFixed(2)}%</span>
-      <span class="pchl">24H</span>
+      <span class="pchl">${T[lang].label24h||"24H"}</span>
     </div>
     <div class="pstats">
-      <div class="ps"><div class="psl">MKT CAP</div><div class="psv" style="color:${color}">${data.cap?"$"+(data.cap/1e9).toFixed(1)+"B":"---"}</div></div>
-      <div class="ps"><div class="psl">24H VOL</div><div class="psv" style="color:${color}">${data.vol?"$"+(data.vol/1e9).toFixed(2)+"B":"---"}</div></div>
-      <div class="ps"><div class="psl">BTC RATIO</div><div class="psv" style="color:${color}">${sym==="btc"?"1.000":sym==="eth"?(S.eth.price/S.btc.price).toFixed(4):(S.sol.price/S.btc.price).toFixed(5)}</div></div>
+      <div class="ps"><div class="psl">${T[lang].mktCap}</div><div class="psv" style="color:${color}">${data.cap?"$"+(data.cap/1e9).toFixed(1)+"B":"---"}</div></div>
+      <div class="ps"><div class="psl">${T[lang].vol24}</div><div class="psv" style="color:${color}">${data.vol?"$"+(data.vol/1e9).toFixed(2)+"B":"---"}</div></div>
+      <div class="ps"><div class="psl">${T[lang].btcRatio}</div><div class="psv" style="color:${color}">${sym==="btc"?"1.000":sym==="eth"?(S.eth.price/S.btc.price).toFixed(4):(S.sol.price/S.btc.price).toFixed(5)}</div></div>
     </div>
     <div style="margin-bottom:10px">
-      <div class="clbl">◆ REAL-TIME PRICE LINE</div>
+      <div class="clbl">${T[lang].priceLabel}</div>
       <canvas id="ln-${sym}" width="320" height="58" style="width:100%;display:block"></canvas>
     </div>
     <div>
-      <div class="clbl">◆ CANDLE CHART</div>
+      <div class="clbl">${T[lang].candleLabel}</div>
       <canvas id="cd-${sym}" width="320" height="58" style="width:100%;display:block"></canvas>
     </div>`;
   requestAnimationFrame(()=>{
@@ -378,7 +414,7 @@ function renderRSI(){
       </div>
     </div>`).join("")+`
     <div style="border-top:1px solid #ffffff08;padding-top:7px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center">
-      ${[["<30","#00cc44","OVERSOLD"],["30-70","#ffcc00","NEUTRAL"],[">70","#ff3300","OVERBOUGHT"]].map(([v,c,l])=>`
+      ${[["<30","#00cc44",T[lang].oversold],["30-70","#ffcc00",T[lang].neutral],[">70","#ff3300",T[lang].overbought]].map(([v,c,l])=>`
         <div><div style="font-size:.24rem;color:${c}44">${l}</div><div style="font-size:.3rem;color:${c}">${v}</div></div>`).join("")}
     </div>`;
 }
@@ -422,7 +458,7 @@ function renderFG(){
   const fv=$("fgv"),fl=$("fgl");
   fv.style.color=ic;fv.style.textShadow=`0 0 14px ${ic}`;fv.textContent=v;
   fl.style.color=ic;fl.textContent=lbls[Math.min(Math.floor(v/20),4)];
-  $("fgs").innerHTML=[["BTC 24H",S.btc.change],["ETH 24H",S.eth.change]].map(([l,v])=>
+  $("fgs").innerHTML=[["BTC "+(T[lang].label24h||"24H"),S.btc.change],["ETH "+(T[lang].label24h||"24H"),S.eth.change]].map(([l,v])=>
     `<div class="ps"><div class="psl">${l}</div><div class="psv" style="color:${v>=0?"#ff3300":"#00cc44"}">${v>=0?"+":""}${v.toFixed(2)}%</div></div>`).join("");
 }
 
@@ -435,22 +471,22 @@ function renderOB(){
   const mx=Math.max(...asks.map(a=>a.v),...bids.map(b=>b.v));
   el.innerHTML=`
     <div style="display:flex;justify-content:space-between;font-size:.27rem;color:#ffffff18;margin-bottom:3px;padding:0 2px">
-      <span>PRICE (USD)</span><span>SIZE (BTC)</span>
+      <span>${T[lang].obPrice}</span><span>${T[lang].obSize}</span>
     </div>
     ${asks.reverse().map(a=>`<div class="ob-row">
       <div class="ob-bg" style="right:0;width:${(a.v/mx*100).toFixed(0)}%;background:#ff3366"></div>
       <span style="color:#ff3366;z-index:1">${fmt(a.p)}</span>
       <span style="color:#ffffff2a;z-index:1;font-size:.32rem">${a.v.toFixed(3)}</span>
     </div>`).join("")}
-    <div class="ob-spread">◆ SPREAD ${fmt(sp*2,1)} (${((sp*2/mid)*100).toFixed(4)}%)</div>
+    <div class="ob-spread">◆ ${T[lang].spread} ${fmt(sp*2,1)} (${((sp*2/mid)*100).toFixed(4)}%)</div>
     ${bids.map(b=>`<div class="ob-row">
       <div class="ob-bg" style="left:0;width:${(b.v/mx*100).toFixed(0)}%;background:#00ff66"></div>
       <span style="color:#00ff66;z-index:1">${fmt(b.p)}</span>
       <span style="color:#ffffff2a;z-index:1;font-size:.32rem">${b.v.toFixed(3)}</span>
     </div>`).join("")}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px;text-align:center">
-      <div style="font-size:.26rem;color:#ff3366">▲ ASKS ${asks.length}</div>
-      <div style="font-size:.26rem;color:#00ff66">▼ BIDS ${bids.length}</div>
+      <div style="font-size:.26rem;color:#ff3366">${T[lang].obAsks} ${asks.length}</div>
+      <div style="font-size:.26rem;color:#00ff66">${T[lang].obBids} ${bids.length}</div>
     </div>`;
 }
 
@@ -464,8 +500,8 @@ function updateTicker(){
     `BTC MCAP $${(S.btc.cap/1e9).toFixed(0)}B`,
     `ETH MCAP $${(S.eth.cap/1e9).toFixed(0)}B`,
     `FG INDEX ${Math.round(S.fg)}`,
-    S.sim?"◆ SIMULATION MODE":"◆ LIVE API DATA",
-    "◆ NOT FINANCIAL ADVICE",
+    S.sim?T[lang].simTicker:T[lang].liveTicker,
+    T[lang].notFin,
     "◆ 픽해줌 PickHeaZoom",
   ];
   const full=items.join("   ◇   ");
@@ -487,10 +523,22 @@ var soundOn = true;
 var _actx = null;
 
 function getACtx() {
-  if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_actx.state === 'suspended') _actx.resume();
+  if (!_actx) {
+    try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  }
+  if (_actx && _actx.state === 'suspended') _actx.resume();
   return _actx;
 }
+// Init AudioContext on first user interaction (browser policy)
+var _audioReady = false;
+function initAudioOnGesture() {
+  if (_audioReady) return;
+  _audioReady = true;
+  getACtx();
+  if (soundOn) playBoot();
+}
+document.addEventListener('click', initAudioOnGesture, {once: true});
+document.addEventListener('keydown', initAudioOnGesture, {once: true});
 
 function beep(freq, dur, type, vol, delay) {
   if (!soundOn) return;
@@ -616,7 +664,7 @@ preloadHistory().then(() => {
   fetchAPI(); setInterval(fetchAPI, 30000);
 });
 
-setTimeout(playBoot, 900);
+// Boot sound plays on first user interaction (see initAudioOnGesture)
 
 setInterval(function(){
   if (S.sim) { simTick(); pushHist(); renderAll(); triggerSounds(); }
@@ -641,7 +689,7 @@ const T = {
     sfxOff: '♪ SFX OFF',
     langBtn: 'KR',
     // card labels
-    live: '◆ LIVE', sim: '◆ SIM',
+    live: '◆ LIVE', sim: '◆ SIM', label24h: '24H',
     mktCap: 'MKT CAP', vol24: '24H VOL', btcRatio: 'BTC RATIO',
     priceLabel: '◆ REAL-TIME PRICE LINE',
     candleLabel: '◆ CANDLE CHART',
@@ -746,7 +794,7 @@ const T = {
     sfxOn: '♪ 효과음 ON',
     sfxOff: '♪ 효과음 OFF',
     langBtn: 'EN',
-    live: '◆ 실시간', sim: '◆ 시뮬',
+    live: '◆ 실시간', sim: '◆ 시뮬', label24h: '24시간',
     mktCap: '시가총액', vol24: '24H 거래량', btcRatio: 'BTC 비율',
     priceLabel: '◆ 실시간 가격 차트',
     candleLabel: '◆ 캔들 차트',
@@ -839,6 +887,9 @@ const T = {
 
 function applyLang() {
   const t = T[lang];
+  const isKR = lang === 'KR';
+  // body class for font switching
+  document.body.classList.toggle('kr-mode', isKR);
   // subtitle
   const sub = document.querySelector('.hdr-sub');
   if (sub) sub.textContent = t.subtitle;
@@ -848,18 +899,36 @@ function applyLang() {
   // sound btn
   const sb = document.getElementById('soundBtn');
   if (sb) sb.textContent = soundOn ? t.sfxOn : t.sfxOff;
+  // status text — re-apply current status in new language
+  const stEl = document.getElementById('stxt');
+  if (stEl) {
+    const cur = stEl.textContent;
+    if (S.wsOk) stEl.textContent = t.liveWS;
+    else if (S.sim) stEl.textContent = t.simMode;
+    else stEl.textContent = t.liveREST;
+  }
+  // UPD: label
+  const stimeEl = document.getElementById('stime');
+  if (stimeEl) {
+    const timeVal = new Date().toLocaleTimeString('ko-KR');
+    stimeEl.textContent = (isKR ? '갱신: ' : 'UPD: ') + timeVal;
+  }
   // bottom section titles
   const fg = document.querySelector('#fgCard .sec');
   if (fg) fg.textContent = t.fearGreed;
-  const rsi = document.querySelectorAll('.sec')[1];
-  if (rsi) rsi.textContent = t.rsiTitle;
-  const ob = document.querySelectorAll('.sec')[2];
-  if (ob) ob.textContent = t.obTitle;
+  const secs = document.querySelectorAll('.sec');
+  if (secs[1]) secs[1].textContent = t.rsiTitle;
+  if (secs[2]) secs[2].textContent = t.obTitle;
   // footer
   const ft = document.querySelector('.footer');
   if (ft) ft.textContent = t.footerData;
-  // re-render dynamic panels (RSI, FG labels use T[lang] now)
-  renderRSI(); renderFG(); renderOB();
+  // credit sub
+  const cs = document.querySelector('.credit-sub');
+  if (cs) cs.innerHTML = isKR
+    ? 'blog.naver.com/pickhaezoom &nbsp;·&nbsp; CLAUDE AI (ANTHROPIC) 활용 제작 &nbsp;·&nbsp; 투자 조언 아님'
+    : 'blog.naver.com/pickhaezoom &nbsp;·&nbsp; POWERED BY CLAUDE AI (ANTHROPIC) &nbsp;·&nbsp; NOT FINANCIAL ADVICE';
+  // re-render all dynamic panels
+  renderAll();
 }
 
 function toggleLang() {
