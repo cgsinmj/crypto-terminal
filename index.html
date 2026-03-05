@@ -543,9 +543,49 @@ function triggerSounds() {
 }
 
 // ── INIT ────────────────────────────────────────────────────
+// ── PRELOAD HISTORY FROM BINANCE KLINES ─────────────────────
+// Fetches last 80 x 1-minute candles so RSI/charts are ready instantly
+async function preloadHistory() {
+  const pairs = [
+    { sym:"BTCUSDT", hkey:"bh", ckey:"bc" },
+    { sym:"ETHUSDT", hkey:"eh", ckey:"ec" },
+    { sym:"SOLUSDT", hkey:"sh", ckey:"sc" },
+  ];
+  try {
+    await Promise.all(pairs.map(async ({sym, hkey, ckey}) => {
+      const url = `https://api.binance.com/api/v3/klines?symbol=${sym}&interval=1m&limit=80`;
+      const r = await fetch(url, {signal: AbortSignal.timeout(6000)});
+      if (!r.ok) return;
+      const data = await r.json();
+      // data[i] = [openTime, open, high, low, close, volume, ...]
+      data.forEach(k => {
+        const close = parseFloat(k[4]);
+        S[hkey].push(close);
+        S[ckey].push({
+          o: parseFloat(k[1]),
+          h: parseFloat(k[2]),
+          l: parseFloat(k[3]),
+          c: close,
+        });
+      });
+      // Set initial price from last candle
+      if (data.length > 0) {
+        const last = data[data.length-1];
+        const key = sym==="BTCUSDT"?"btc":sym==="ETHUSDT"?"eth":"sol";
+        S[key].price = parseFloat(last[4]);
+      }
+    }));
+    renderAll(); // render immediately with pre-filled data
+  } catch(e) {
+    // silently fail — WS will fill data over time
+  }
+}
+
 S.wsOk = false;
-connectWS();
-fetchAPI(); setInterval(fetchAPI, 30000);
+preloadHistory().then(() => {
+  connectWS();
+  fetchAPI(); setInterval(fetchAPI, 30000);
+});
 
 setTimeout(playBoot, 900);
 
